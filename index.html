@@ -66,8 +66,8 @@ body {
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 .btn:disabled  { opacity: 0.35; cursor: not-allowed; transform: none !important; }
 .btn-lg        { font-size: 1rem; padding: 0.75rem 1.6rem; border-radius: 10px; }
-.btn-ai        { background: linear-gradient(135deg, #7c3aed, #0099ff); color: #fff; }
-.btn-ai:hover  { background: linear-gradient(135deg, #9461ff, #33b3ff); transform: translateY(-1px); }
+.btn-ai        { background: var(--card); border: 1px solid var(--border2); color: var(--text); }
+.btn-ai:hover  { border-color: var(--accent2); color: var(--accent2); transform: translateY(-1px); }
 
 input, textarea, select {
   font-family: var(--font);
@@ -486,6 +486,20 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
       <p style="margin-top:0.4rem;font-size:0.76rem;color:var(--muted2);">Leave blank to skip AI polls — manual polls always work.</p>
     </div>
 
+    <div style="background:rgba(0,153,255,0.07);border:1px solid rgba(0,153,255,0.2);border-radius:10px;padding:0.85rem;font-size:0.8rem;color:var(--muted);line-height:1.5;">
+      📡 <strong style="color:var(--text);">Reliable TURN (recommended)</strong> — free at <strong style="color:var(--text);">dashboard.metered.ca</strong>. Sign up → Create App → paste your App Name and API Key below. Fixes connection drops on phone/conference networks. Leave blank to use fallback servers.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+      <div>
+        <label class="field-label">Metered App Name</label>
+        <input type="text" id="metered-app-input" placeholder="your-app-name">
+      </div>
+      <div>
+        <label class="field-label">Metered API Key</label>
+        <input type="password" id="metered-key-input" placeholder="••••••••">
+      </div>
+    </div>
+
     <button class="btn btn-primary btn-lg" onclick="launchPresenter()">Start Session →</button>
     <button class="btn btn-ghost" onclick="closeSetup()">Cancel</button>
   </div>
@@ -615,10 +629,10 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
       <div class="ai-panel-header">
         <div class="ai-panel-title">
           <span class="ai-badge">AI</span>
-          Poll Generator
+          Question Generator
         </div>
-        <button class="btn btn-ai" id="ai-poll-btn" onclick="generateAIPoll()" disabled style="font-size:0.82rem;padding:0.45rem 0.9rem;">
-          🤖 AI Poll
+        <button class="btn btn-ai" id="ai-poll-btn" onclick="generateAIPoll()" disabled style="font-size:0.82rem;padding:0.45rem 0.9rem;letter-spacing:0.01em;">
+          Generate AI Poll
         </button>
       </div>
       <div class="ai-status" id="ai-status">Load slides to enable. Click "🤖 AI Poll" to generate a multiple-choice question from the current slide and broadcast it as a live poll.</div>
@@ -682,23 +696,43 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-// TURN servers — needed for mobile/conference NAT traversal
-const ICE_CONFIG = {
+// ── METERED.CA FREE TURN ─────────────────────────────────────────
+// Sign up free at dashboard.metered.ca → Create App → copy appName + apiKey
+// Gives you 50 GB/month of reliable TURN relay — keeps the app fully static.
+const METERED_APP  = localStorage.getItem('slidesync_metered_app')  || '';
+const METERED_KEY  = localStorage.getItem('slidesync_metered_key')  || '';
+
+// Fallback ICE config used until metered credentials are fetched
+const ICE_FALLBACK = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
     {
-      urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443'],
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    },
-    {
-      urls: 'turns:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
+      urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443',
+             'turn:openrelay.metered.ca:443?transport=tcp'],
+      username: 'openrelayproject', credential: 'openrelayproject'
     }
   ]
 };
+
+async function getIceConfig() {
+  if (!METERED_APP || !METERED_KEY) return ICE_FALLBACK;
+  try {
+    const res = await fetch(
+      `https://${METERED_APP}.metered.ca/api/v1/turn/credentials?apiKey=${METERED_KEY}`
+    );
+    const servers = await res.json();
+    if (Array.isArray(servers) && servers.length) {
+      // Add Google STUN alongside metered TURN servers
+      return { iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        ...servers
+      ]};
+    }
+  } catch(e) {}
+  return ICE_FALLBACK;
+}
 
 let peer        = null;
 let connections = [];
@@ -748,6 +782,10 @@ window.addEventListener('load', () => {
   // Pre-fill API key if saved
   const saved = getApiKey();
   if (saved) document.getElementById('api-key-input').value = saved;
+  const mApp = localStorage.getItem('slidesync_metered_app');
+  const mKey = localStorage.getItem('slidesync_metered_key');
+  if (mApp) document.getElementById('metered-app-input').value = mApp;
+  if (mKey) document.getElementById('metered-key-input').value = mKey;
 });
 
 // ════════════════════════════════════════════════════════════════
@@ -763,6 +801,10 @@ function closeSetup() {
 function launchPresenter() {
   const typed = document.getElementById('api-key-input').value.trim();
   if (typed) saveApiKey(typed);
+  const mApp = document.getElementById('metered-app-input').value.trim();
+  const mKey = document.getElementById('metered-key-input').value.trim();
+  if (mApp) localStorage.setItem('slidesync_metered_app', mApp);
+  if (mKey) localStorage.setItem('slidesync_metered_key', mKey);
   closeSetup();
   showScreen('presenter');
   initPresenterPeer();
@@ -778,10 +820,11 @@ function makeShortId() {
   return 'PEDS' + Math.floor(100 + Math.random() * 900);
 }
 
-function initPresenterPeer() {
+async function initPresenterPeer() {
   setPresStatus('Connecting…', false);
+  const iceConfig = await getIceConfig();
   const shortId = makeShortId();
-  peer = new Peer(shortId, { debug: 0, config: ICE_CONFIG });
+  peer = new Peer(shortId, { debug: 0, config: iceConfig });
 
   peer.on('open', id => {
     roomId = id;
@@ -802,15 +845,16 @@ function initPresenterPeer() {
     connections.push(conn);
     updateAudCount();
     conn.on('open', () => {
-      // Short delay lets the data channel stabilise before we push data
+      // Delay lets the data channel fully stabilise before pushing data
       setTimeout(() => {
         if (slides.length) sendSlideToConn(conn, currentSlide);
         if (activePoll) sendTo(conn, { type:'poll_start', ...activePoll });
-      }, 600);
+      }, 300);
     });
     conn.on('data', raw => {
       const msg = decode(raw);
       if (!msg) return;
+      if (msg.type === 'ping') return;
       if (msg.type === 'poll_vote') incomingVote(msg);
     });
     conn.on('close',  () => { connections = connections.filter(c=>c!==conn); updateAudCount(); });
@@ -961,7 +1005,7 @@ async function generateAIPoll() {
 
   const btn = document.getElementById('ai-poll-btn');
   btn.disabled = true;
-  btn.textContent = '⏳ Generating…';
+  btn.textContent = 'Generating…';
   setAiStatus('Analyzing slide with AI…', true);
 
   try {
@@ -1036,7 +1080,7 @@ Make options plausible but with one clearly best answer. Base question and optio
     setAiStatus('⚠ ' + e.message, false);
   } finally {
     btn.disabled = false;
-    btn.textContent = '🤖 AI Poll';
+    btn.textContent = 'Generate AI Poll';
   }
 }
 
@@ -1181,17 +1225,25 @@ function joinSession() {
   initAudiencePeer(id);
 }
 
-function initAudiencePeer(targetId) {
+let _keepalive = null;
+
+async function initAudiencePeer(targetId) {
   document.getElementById('aud-dot').classList.remove('live');
-  peer = new Peer(undefined, { debug: 0, config: ICE_CONFIG });
+  const iceConfig = await getIceConfig();
+  peer = new Peer(undefined, { debug: 0, config: iceConfig });
 
   peer.on('open', myId => {
-    presConn = peer.connect(targetId, { reliable: true });
+    presConn = peer.connect(targetId, { reliable: true, serialization: 'json' });
 
     presConn.on('open', () => {
       document.getElementById('aud-dot').classList.add('live');
       document.getElementById('aud-wait').innerHTML =
         '<p style="color:var(--muted);font-size:0.85rem;">Connected — waiting for presenter to advance…</p>';
+      // Keepalive: send a tiny ping every 8s so NAT doesn't drop the channel
+      clearInterval(_keepalive);
+      _keepalive = setInterval(() => {
+        if (presConn && presConn.open) presConn.send({ t:'d', p:'{"type":"ping"}' });
+      }, 8000);
     });
 
     presConn.on('data', raw => {
@@ -1200,8 +1252,22 @@ function initAudiencePeer(targetId) {
       handleAudMsg(msg, myId);
     });
 
-    presConn.on('close', () => document.getElementById('aud-dot').classList.remove('live'));
-    presConn.on('error', () => document.getElementById('aud-dot').classList.remove('live'));
+    function onDisconnect() {
+      clearInterval(_keepalive);
+      document.getElementById('aud-dot').classList.remove('live');
+      document.getElementById('aud-wait').style.display = 'flex';
+      document.getElementById('aud-wait').innerHTML =
+        '<div class="spinner"></div><p style="font-size:0.85rem;color:var(--muted);">Reconnecting…</p>';
+      // Auto-reconnect after 2.5s if still on audience screen
+      setTimeout(() => {
+        if (document.getElementById('audience').classList.contains('active')) {
+          try { peer.destroy(); } catch(e) {}
+          initAudiencePeer(targetId);
+        }
+      }, 2500);
+    }
+    presConn.on('close', onDisconnect);
+    presConn.on('error', onDisconnect);
   });
 
   peer.on('error', e => {
