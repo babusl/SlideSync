@@ -66,6 +66,8 @@ body {
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 .btn:disabled  { opacity: 0.35; cursor: not-allowed; transform: none !important; }
 .btn-lg        { font-size: 1rem; padding: 0.75rem 1.6rem; border-radius: 10px; }
+.btn-ai        { background: linear-gradient(135deg, #7c3aed, #0099ff); color: #fff; }
+.btn-ai:hover  { background: linear-gradient(135deg, #9461ff, #33b3ff); transform: translateY(-1px); }
 
 input, textarea, select {
   font-family: var(--font);
@@ -160,7 +162,7 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
   background: var(--card);
   border: 1px solid var(--border2);
   border-radius: 18px; padding: 2rem;
-  max-width: 440px; width: 100%;
+  max-width: 460px; width: 100%;
   display: flex; flex-direction: column; gap: 1.25rem;
   animation: slideUp 0.25s ease;
 }
@@ -169,13 +171,27 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
 .setup-modal h2 { font-family: var(--display); font-size: 1.3rem; }
 .setup-modal p  { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
 
+.api-info-box {
+  background: rgba(124,58,237,0.07);
+  border: 1px solid rgba(124,58,237,0.25);
+  border-radius: 10px; padding: 0.85rem;
+  font-size: 0.8rem; color: var(--muted); line-height: 1.5;
+}
+.api-info-box strong { color: var(--text); }
+.api-key-badge {
+  display: inline-block; background: rgba(0,212,180,0.15);
+  border: 1px solid rgba(0,212,180,0.3); border-radius: 6px;
+  padding: 0.1rem 0.45rem; font-size: 0.72rem;
+  font-weight: 700; color: var(--accent); margin-left: 0.25rem;
+}
+
 /* ══════════════════════════════════════════════
    PRESENTER SCREEN
 ══════════════════════════════════════════════ */
 #presenter {
   min-height: 100vh;
   grid-template-columns: 1fr 300px;
-  grid-template-rows: 56px 1fr 210px;
+  grid-template-rows: 56px 1fr 200px;
 }
 
 /* Header */
@@ -229,13 +245,6 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
 .session-panel { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
 #qr-box { background: white; padding: 8px; border-radius: 10px; display: flex; }
 #qr-box canvas, #qr-box img { display: block; }
-.room-code {
-  font-family: 'Courier New', monospace; font-size: 0.9rem; font-weight: 700;
-  color: var(--accent); background: var(--bg); border-radius: 6px;
-  padding: 0.35rem 0.75rem; letter-spacing: 0.08em; cursor: pointer;
-  border: 1px solid var(--border2); transition: all 0.15s;
-}
-.room-code:hover { border-color: var(--accent); }
 .audience-row { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--muted); }
 .aud-num { font-weight: 700; color: var(--text); }
 
@@ -251,28 +260,49 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
 /* Poll results sidebar */
 .res-q { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem; line-height: 1.4; }
 .res-list { display: flex; flex-direction: column; gap: 0.6rem; }
-.res-row {}
 .res-meta { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 0.25rem; }
 .res-label { font-weight: 600; }
 .res-count { color: var(--muted); }
 .res-track { background: var(--bg); border-radius: 4px; height: 6px; overflow: hidden; }
 .res-fill   { background: var(--accent); height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+.res-fill.gold { background: var(--gold); }
 
 /* Footer */
 .pres-footer {
   grid-column: 1 / -1;
   background: var(--surface); border-top: 1px solid var(--border);
-  display: flex; gap: 1rem; padding: 1rem 1.25rem; align-items: flex-start;
+  display: flex; gap: 1rem; padding: 1rem 1.25rem; align-items: center;
   overflow: hidden;
 }
 .nav-btns { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
 .nav-btns .btn { font-size: 1.1rem; padding: 0.65rem 1rem; }
 
-.q-panel { flex: 1; min-width: 0; }
-.q-panel-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
-.q-list  { display: flex; flex-direction: column; gap: 0.4rem; }
-.q-item  { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.82rem; line-height: 1.45; }
-.q-loading { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--muted); }
+/* AI Panel in footer */
+.ai-panel {
+  flex: 1; min-width: 0;
+  background: var(--card);
+  border: 1px solid rgba(124,58,237,0.25);
+  border-radius: 12px; padding: 0.85rem 1rem;
+  display: flex; flex-direction: column; gap: 0.6rem;
+}
+.ai-panel-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+}
+.ai-panel-title {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--muted);
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.ai-panel-title .ai-badge {
+  background: linear-gradient(135deg, #7c3aed, #0099ff);
+  color: white; font-size: 0.62rem; padding: 0.1rem 0.4rem;
+  border-radius: 4px; letter-spacing: 0.02em;
+}
+.ai-status {
+  font-size: 0.8rem; color: var(--muted); line-height: 1.4;
+  min-height: 1.2rem;
+}
+.ai-status.active { color: var(--text); }
 
 /* ══════════════════════════════════════════════
    JOIN SCREEN
@@ -336,7 +366,7 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
 .aud-wait .spinner { width: 22px; height: 22px; border-width: 2.5px; }
 .aud-wait p { font-size: 0.85rem; }
 
-/* Audience poll */
+/* Audience poll — used for both manual polls and AI polls */
 .aud-poll-card {
   background: var(--card);
   border: 1.5px solid var(--accent);
@@ -344,7 +374,15 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
   display: none;
   animation: slideUp 0.2s ease;
 }
+.aud-poll-card.ai-poll { border-color: #7c3aed; }
 .aud-poll-card.visible { display: block; }
+.aud-poll-badge {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; padding: 0.15rem 0.5rem; border-radius: 4px;
+  display: inline-block; margin-bottom: 0.5rem;
+}
+.aud-poll-badge.manual { background: rgba(0,212,180,0.15); color: var(--accent); }
+.aud-poll-badge.ai { background: linear-gradient(135deg,rgba(124,58,237,0.3),rgba(0,153,255,0.3)); color: #a78bfa; }
 .aud-poll-q { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; line-height: 1.4; }
 .aud-poll-opts { display: flex; flex-direction: column; gap: 0.45rem; }
 .aud-opt-btn {
@@ -353,32 +391,45 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
   color: var(--text); border-radius: 9px;
   text-align: left; cursor: pointer;
   font-family: var(--font); font-size: 0.875rem; font-weight: 500;
-  transition: all 0.15s;
+  transition: all 0.15s; display: flex; align-items: center; gap: 0.6rem;
 }
 .aud-opt-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 .aud-opt-btn.chosen { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
-.aud-opt-btn:disabled { cursor: default; opacity: 0.7; }
+.aud-opt-btn.chosen.ai-chosen { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+.aud-opt-btn:disabled { cursor: default; }
+.opt-letter {
+  width: 22px; height: 22px; border-radius: 4px;
+  background: var(--border); display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 800; color: var(--muted); flex-shrink: 0;
+}
 .voted-msg { text-align: center; font-size: 0.8rem; color: var(--accent); margin-top: 0.6rem; display: none; }
 
-/* Audience questions */
-.aud-q-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 14px; padding: 0; overflow: hidden;
+/* Results view for audience after voting */
+.aud-results { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
+.aud-res-row { display: flex; flex-direction: column; gap: 0.2rem; }
+.aud-res-meta { display: flex; justify-content: space-between; font-size: 0.78rem; }
+.aud-res-label { font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+.aud-res-count { color: var(--muted); }
+.aud-res-track { background: var(--bg); border-radius: 4px; height: 7px; overflow: hidden; }
+.aud-res-fill { background: var(--accent); height: 100%; border-radius: 4px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.aud-res-fill.ai-fill { background: linear-gradient(90deg,#7c3aed,#0099ff); }
+
+/* ══════════════════════════════════════════════
+   API KEY DIALOG
+══════════════════════════════════════════════ */
+#apikey-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 1rem;
 }
-.aud-q-header {
-  padding: 0.7rem 1rem;
-  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.07em; color: var(--accent);
-  border-bottom: 1px solid var(--border); background: rgba(0,212,180,0.04);
+#apikey-overlay.open { display: flex; }
+.apikey-modal {
+  background: var(--card); border: 1px solid rgba(124,58,237,0.4);
+  border-radius: 18px; padding: 1.75rem; max-width: 420px; width: 100%;
+  display: flex; flex-direction: column; gap: 1rem;
+  animation: slideUp 0.2s ease;
 }
-.aud-q-list { padding: 0.5rem 0; }
-.aud-q-item {
-  padding: 0.6rem 1rem; font-size: 0.875rem; line-height: 1.45;
-  border-bottom: 1px solid var(--border); display: flex; gap: 0.6rem; align-items: flex-start;
-}
-.aud-q-item:last-child { border-bottom: none; }
-.aud-q-num { color: var(--accent); font-weight: 700; font-size: 0.8rem; flex-shrink: 0; margin-top: 0.1rem; }
-.aud-q-loading { padding: 1rem; display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; color: var(--muted); }
+.apikey-modal h3 { font-family: var(--display); font-size: 1.15rem; }
 
 /* ══════════════════════════════════════════════
    RESPONSIVE
@@ -386,7 +437,7 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
 @media (max-width: 700px) {
   #presenter { grid-template-columns: 1fr; grid-template-rows: 56px 1fr auto auto; }
   .pres-sidebar { display: none; }
-  .pres-footer { flex-direction: column; }
+  .pres-footer { flex-direction: column; align-items: stretch; }
 }
 </style>
 </head>
@@ -408,7 +459,7 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
       <div class="mode-card" onclick="showJoin()">
         <div class="mode-icon">📱</div>
         <div class="mode-title">Join Session</div>
-        <div class="mode-desc">Follow along, answer polls, zoom into figures</div>
+        <div class="mode-desc">Follow along, vote on polls, zoom into figures</div>
       </div>
     </div>
   </div>
@@ -419,16 +470,42 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
   <div class="setup-modal">
     <div class="wordmark" style="font-size:1.4rem;">Slide<em style="color:var(--accent);font-style:normal;">Sync</em></div>
     <h2>Presenter Setup</h2>
+
+    <div class="api-info-box">
+      🤖 <strong>AI Poll Generation (optional)</strong><br>
+      Click <strong>🤖 AI Poll</strong> during your presentation to instantly generate a multiple-choice question from your current slide. Audience votes live and sees results — exactly like the manual poll.<br><br>
+      Requires a free <strong>OpenRouter</strong> API key (openrouter.ai — email only, no billing).
+      <span class="api-key-badge">Presenter only</span> — audience members never need one.
+      <br><br>
+      Your key is saved in your browser's local storage. <strong>It is never in the public code</strong> and never sent anywhere except OpenRouter.
+    </div>
+
     <div>
-      <label class="field-label">OpenRouter API Key (Free)</label>
-      <input type="password" id="api-key-input" placeholder="sk-or-...">
-      <p style="margin-top:0.4rem;">Free at <strong>openrouter.ai</strong> — email signup only, no billing. Uses free vision models to read your actual slides. Leave blank to skip AI questions.</p>
+      <label class="field-label">OpenRouter API Key</label>
+      <input type="password" id="api-key-input" placeholder="sk-or-v1-...">
+      <p style="margin-top:0.4rem;font-size:0.76rem;color:var(--muted2);">Leave blank to skip AI polls — manual polls always work.</p>
     </div>
-    <div style="background:rgba(0,212,180,0.07);border:1px solid rgba(0,212,180,0.2);border-radius:10px;padding:0.75rem;font-size:0.8rem;color:var(--muted);line-height:1.5;">
-      🎙️ <strong style="color:var(--text);">Voice + Vision</strong> — SlideSync will listen while you present. Your speech is combined with the slide image to generate sharper, more contextual questions. Allow microphone when prompted.
-    </div>
+
     <button class="btn btn-primary btn-lg" onclick="launchPresenter()">Start Session →</button>
     <button class="btn btn-ghost" onclick="closeSetup()">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ API KEY PROMPT (runtime) ══ -->
+<div id="apikey-overlay">
+  <div class="apikey-modal">
+    <h3>🤖 AI Poll — API Key Needed</h3>
+    <p style="font-size:0.82rem;color:var(--muted);line-height:1.5;">
+      Get a free key at <strong style="color:var(--text);">openrouter.ai</strong> (email signup, no billing). Your key is stored locally in this browser only — it's never in your code or public repo.
+    </p>
+    <div>
+      <label class="field-label">OpenRouter API Key</label>
+      <input type="password" id="runtime-key-input" placeholder="sk-or-v1-...">
+    </div>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="btn btn-ai btn-lg" style="flex:1;" onclick="saveRuntimeKey()">Save &amp; Generate</button>
+      <button class="btn btn-ghost" onclick="closeApiKeyDialog()">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -444,10 +521,6 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
       <button onclick="copyRoom()" style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:var(--muted);padding:0;" title="Copy">⎘</button>
     </div>
     <span class="pres-bar spacer"></span>
-    <div id="mic-indicator" style="display:none;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--muted);background:rgba(255,77,106,0.1);border:1px solid rgba(255,77,106,0.3);border-radius:8px;padding:0.25rem 0.65rem;">
-      <span id="mic-dot" style="width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease-in-out infinite;"></span>
-      <span>Listening</span>
-    </div>
     <span class="slide-num" id="pres-counter"></span>
     <label class="btn btn-ghost" style="font-size:0.82rem;cursor:pointer;">
       📁 Upload PDF
@@ -479,7 +552,6 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
     <div class="sb-section">
       <div class="sb-label">Session</div>
       <div class="session-panel">
-        <!-- Big room code first -->
         <div style="text-align:center;width:100%;">
           <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.3rem;">Room ID</div>
           <div id="room-code-el" onclick="copyRoom()" title="Click to copy"
@@ -489,7 +561,6 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
                       padding:0.4rem 0.75rem;display:inline-block;">—</div>
           <div style="font-size:0.68rem;color:var(--muted2);margin-top:0.25rem;">tap to copy</div>
         </div>
-        <!-- QR below -->
         <div id="qr-box" style="margin-top:0.25rem;"></div>
         <div id="qr-url-line" style="font-size:0.62rem;color:var(--muted2);word-break:break-all;text-align:center;line-height:1.3;display:none;padding:0 0.5rem;"></div>
         <div style="width:100%;margin-top:0.5rem;">
@@ -506,8 +577,8 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
 
     <!-- Poll builder -->
     <div class="sb-section" style="flex:1;">
-      <div class="sb-label">Live Poll</div>
-      
+      <div class="sb-label">Manual Poll</div>
+
       <div id="poll-build">
         <div class="poll-q-row">
           <input id="poll-q-input" placeholder="Ask the audience...">
@@ -518,11 +589,14 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
         </div>
         <div class="poll-actions">
           <button class="btn btn-ghost" onclick="addOpt()">+ Option</button>
-          <button class="btn btn-success" onclick="launchPoll()">▶ Launch</button>
+          <button class="btn btn-success" onclick="launchPoll(false)">▶ Launch</button>
         </div>
       </div>
 
       <div id="poll-live" style="display:none;">
+        <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.6rem;">
+          <span id="poll-live-badge" class="aud-poll-badge manual">Live Poll</span>
+        </div>
         <div class="res-q" id="res-q-text"></div>
         <div class="res-list" id="res-list"></div>
         <button class="btn btn-danger" onclick="endPoll()" style="width:100%;margin-top:0.8rem;">■ End Poll</button>
@@ -530,20 +604,24 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
     </div>
   </div>
 
-  <!-- Footer: nav + questions -->
+  <!-- Footer: nav + AI panel -->
   <div class="pres-footer">
     <div class="nav-btns">
       <button class="btn btn-ghost" id="btn-prev" onclick="prevSlide()" title="Previous (←)">◀</button>
       <button class="btn btn-primary" id="btn-next" onclick="nextSlide()" title="Next (→)">▶</button>
     </div>
-    <div class="q-panel">
-      <div class="q-panel-title">
-        <span>🤖 AI Discussion Questions</span>
-        <span id="q-slide-tag" style="color:var(--muted2);font-size:0.7rem;"></span>
+
+    <div class="ai-panel">
+      <div class="ai-panel-header">
+        <div class="ai-panel-title">
+          <span class="ai-badge">AI</span>
+          Poll Generator
+        </div>
+        <button class="btn btn-ai" id="ai-poll-btn" onclick="generateAIPoll()" disabled style="font-size:0.82rem;padding:0.45rem 0.9rem;">
+          🤖 AI Poll
+        </button>
       </div>
-      <div id="pres-q-area">
-        <div style="font-size:0.82rem;color:var(--muted);">Load slides to generate questions</div>
-      </div>
+      <div class="ai-status" id="ai-status">Load slides to enable. Click "🤖 AI Poll" to generate a multiple-choice question from the current slide and broadcast it as a live poll.</div>
     </div>
   </div>
 </div>
@@ -585,19 +663,14 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
       <p>Connected — waiting for presenter...</p>
     </div>
 
-    <!-- Poll card -->
+    <!-- Poll card — shared by manual and AI polls -->
     <div class="aud-poll-card" id="aud-poll-card">
+      <div class="aud-poll-badge manual" id="aud-poll-badge">Live Poll</div>
       <div class="aud-poll-q" id="aud-poll-q"></div>
       <div class="aud-poll-opts" id="aud-poll-opts"></div>
-      <div class="voted-msg" id="voted-msg">✓ Vote recorded!</div>
-    </div>
-
-    <!-- Questions card -->
-    <div class="aud-q-card" id="aud-q-card" style="display:none;">
-      <div class="aud-q-header">💬 Discussion Questions</div>
-      <div class="aud-q-list" id="aud-q-list">
-        <div class="aud-q-loading"><span class="spinner"></span> Generating questions...</div>
-      </div>
+      <div class="voted-msg" id="voted-msg">✓ Vote recorded! Results update live.</div>
+      <!-- Live results shown after voting -->
+      <div class="aud-results" id="aud-results" style="display:none;"></div>
     </div>
   </div>
 </div>
@@ -609,18 +682,27 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-let peer = null;
-let connections  = [];     // presenter: audience peers
-let presConn     = null;   // audience: connection to presenter
-let slides       = [];     // rendered jpeg dataURLs
+let peer        = null;
+let connections = [];
+let presConn    = null;
+let slides      = [];
 let currentSlide = 0;
-let apiKey       = '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';
-let roomId       = '';
-let activePoll   = null;
-let pollTally    = {};
-let pollVoters   = new Set();
-let hasVoted     = false;
-const chunkBufs  = {};
+let roomId      = '';
+let activePoll  = null;   // { question, options, isAI }
+let pollTally   = {};
+let pollVoters  = new Set();
+let hasVoted    = false;
+const chunkBufs = {};
+
+// ════════════════════════════════════════════════════════════════
+// API KEY — stored locally only, never in code
+// ════════════════════════════════════════════════════════════════
+function getApiKey() {
+  return localStorage.getItem('slidesync_api_key') || '';
+}
+function saveApiKey(k) {
+  if (k) localStorage.setItem('slidesync_api_key', k);
+}
 
 // ════════════════════════════════════════════════════════════════
 // ROUTING
@@ -645,13 +727,15 @@ window.addEventListener('load', () => {
     setViewerHeight();
     initAudiencePeer(r);
   }
+  // Pre-fill API key if saved
+  const saved = getApiKey();
+  if (saved) document.getElementById('api-key-input').value = saved;
 });
 
 // ════════════════════════════════════════════════════════════════
 // PRESENTER SETUP
 // ════════════════════════════════════════════════════════════════
 function startPresenterFlow() {
-  if (apiKey) { launchPresenter(); return; }
   document.getElementById('setup-overlay').classList.add('open');
 }
 function closeSetup() {
@@ -660,7 +744,7 @@ function closeSetup() {
 
 function launchPresenter() {
   const typed = document.getElementById('api-key-input').value.trim();
-  if (typed) apiKey = typed; // keep baked-in key if field left blank
+  if (typed) saveApiKey(typed);
   closeSetup();
   showScreen('presenter');
   initPresenterPeer();
@@ -673,29 +757,29 @@ function setPresStatus(txt, live) {
 }
 
 function makeShortId() {
-  const num = Math.floor(100 + Math.random() * 900);
-  return 'PEDS' + num;
+  return 'PEDS' + Math.floor(100 + Math.random() * 900);
 }
 
 function initPresenterPeer() {
   setPresStatus('Connecting…', false);
   const shortId = makeShortId();
   peer = new Peer(shortId, { debug: 0 });
+
   peer.on('open', id => {
     roomId = id;
-    document.getElementById('room-code-el').textContent = id;
     setPresStatus('Live', true);
     buildQR(id);
   });
+
   peer.on('error', e => {
-    // If ID taken (rare), retry with a new one
     if (e.type === 'unavailable-id') {
       peer.destroy();
-      initPresenterPeer();
+      setTimeout(initPresenterPeer, 200);
     } else {
       setPresStatus('⚠ ' + e.type, false);
     }
   });
+
   peer.on('connection', conn => {
     connections.push(conn);
     updateAudCount();
@@ -708,23 +792,8 @@ function initPresenterPeer() {
       if (!msg) return;
       if (msg.type === 'poll_vote') incomingVote(msg);
     });
-    conn.on('close', () => {
-      connections = connections.filter(c => c !== conn);
-      updateAudCount();
-    });
-    conn.on('error', () => {
-      connections = connections.filter(c => c !== conn);
-      updateAudCount();
-    });
-  });
-  peer.on('error', e => {
-    if (e.type === 'unavailable-id') {
-      // ID taken — destroy and retry with a new one
-      peer.destroy();
-      setTimeout(initPresenterPeer, 300);
-    } else {
-      setPresStatus('⚠ ' + e.type, false);
-    }
+    conn.on('close',  () => { connections = connections.filter(c=>c!==conn); updateAudCount(); });
+    conn.on('error',  () => { connections = connections.filter(c=>c!==conn); updateAudCount(); });
   });
 }
 
@@ -733,7 +802,6 @@ function updateAudCount() {
 }
 
 function buildQR(id) {
-  // Populate bar room display
   document.getElementById('bar-room-code').textContent = id;
   document.getElementById('bar-room-block').style.display = 'flex';
   document.getElementById('room-code-el').textContent = id;
@@ -743,18 +811,17 @@ function buildQR(id) {
 function getBaseUrl() {
   const custom = document.getElementById('github-url-input');
   if (custom && custom.value.trim()) return custom.value.trim().replace(/\/+$/, '');
-  const here = window.location.href.split('?')[0];
-  return here;
+  return window.location.href.split('?')[0];
 }
 
 function renderQR(id) {
-  const base   = getBaseUrl();
-  const isLocal = base.startsWith('file:') || base.includes('localhost') || base.includes('127.0.0.1');
-  const qrBox  = document.getElementById('qr-box');
-  const urlEl  = document.getElementById('qr-url-line');
+  const base  = getBaseUrl();
+  const local = base.startsWith('file:') || base.includes('localhost') || base.includes('127.0.0.1');
+  const qrBox = document.getElementById('qr-box');
+  const urlEl = document.getElementById('qr-url-line');
   qrBox.innerHTML = '';
 
-  if (isLocal) {
+  if (local) {
     qrBox.innerHTML =
       '<div style="width:130px;padding:0.75rem;background:#0f1422;border:1px dashed #2a3a5c;border-radius:8px;text-align:center;">' +
       '<div style="font-size:1.4rem;margin-bottom:0.35rem;">📲</div>' +
@@ -763,9 +830,7 @@ function renderQR(id) {
     if (urlEl) urlEl.style.display = 'none';
   } else {
     const url = base + '?room=' + encodeURIComponent(id);
-    try {
-      new QRCode(qrBox, { text: url, width: 130, height: 130, colorDark: '#000', colorLight: '#fff' });
-    } catch(e) {}
+    try { new QRCode(qrBox, { text:url, width:130, height:130, colorDark:'#000', colorLight:'#fff' }); } catch(e) {}
     if (urlEl) { urlEl.textContent = url; urlEl.style.display = 'block'; }
   }
 }
@@ -783,25 +848,22 @@ function copyRoom() {
 // ════════════════════════════════════════════════════════════════
 async function handleFile(file) {
   if (!file) return;
-  document.getElementById('stage-empty').style.display = 'none';
+  document.getElementById('stage-empty').style.display  = 'none';
   document.getElementById('pres-slide-img').style.display = 'none';
-  document.getElementById('pres-loading').style.display = 'flex';
+  document.getElementById('pres-loading').style.display  = 'flex';
 
   try {
     const buf = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
     slides = [];
-
     for (let i = 1; i <= pdf.numPages; i++) {
-      document.getElementById('loading-text').textContent =
-        `Rendering slide ${i} / ${pdf.numPages}…`;
+      document.getElementById('loading-text').textContent = `Rendering slide ${i} / ${pdf.numPages}…`;
       slides.push(await renderPage(pdf, i));
     }
-
     document.getElementById('pres-loading').style.display = 'none';
     currentSlide = 0;
     showPresSlide(0);
-  } catch (e) {
+  } catch(e) {
     document.getElementById('loading-text').textContent = '⚠ ' + e.message;
   }
 }
@@ -831,9 +893,11 @@ function showPresSlide(idx) {
   document.getElementById('btn-prev').disabled = idx === 0;
   document.getElementById('btn-next').disabled = idx === slides.length - 1;
 
-  stopListening();
+  const aiBtn = document.getElementById('ai-poll-btn');
+  aiBtn.disabled = false;
+
+  setAiStatus('Ready — click "🤖 AI Poll" to generate a question from this slide.');
   broadcast({ type:'slide', idx, total:slides.length, img:slides[idx] });
-  generateQ(idx);
 }
 
 function nextSlide() { if (currentSlide < slides.length - 1) showPresSlide(currentSlide + 1); }
@@ -842,9 +906,191 @@ function prevSlide() { if (currentSlide > 0) showPresSlide(currentSlide - 1); }
 document.addEventListener('keydown', e => {
   if (!document.getElementById('presenter').classList.contains('active')) return;
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  nextSlide();
-  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    prevSlide();
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevSlide();
 });
+
+function setAiStatus(msg, isActive) {
+  const el = document.getElementById('ai-status');
+  el.textContent = msg;
+  el.className = 'ai-status' + (isActive ? ' active' : '');
+}
+
+// ════════════════════════════════════════════════════════════════
+// AI POLL GENERATION — presenter only, one call per click
+// ════════════════════════════════════════════════════════════════
+async function generateAIPoll() {
+  if (!slides.length) return;
+
+  const key = getApiKey();
+  if (!key) {
+    openApiKeyDialog();
+    return;
+  }
+
+  const btn = document.getElementById('ai-poll-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating…';
+  setAiStatus('Analyzing slide with AI…', true);
+
+  try {
+    const b64    = slides[currentSlide].split(',')[1];
+    const prompt = `You are an expert in pediatric anesthesia education. Examine this conference slide carefully.
+
+Generate ONE multiple-choice question that tests understanding of the key concept shown. The question should be suitable for anesthesiologists and trainees.
+
+Return ONLY a valid JSON object — no markdown, no preamble, no code fences:
+{
+  "question": "Your specific question based on slide content?",
+  "options": [
+    "A. First option",
+    "B. Second option",
+    "C. Third option",
+    "D. Fourth option"
+  ]
+}
+
+Make options plausible but with one clearly best answer. Base question and options directly on visible slide content.`;
+
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`,
+        'HTTP-Referer': 'https://slidesync.app',
+        'X-Title': 'SlideSync'
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout:free',
+        max_tokens: 350,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${b64}` } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data  = await res.json();
+    const raw   = data.choices?.[0]?.message?.content?.trim() || '{}';
+    const clean = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
+    const poll  = JSON.parse(clean);
+
+    if (!poll.question || !Array.isArray(poll.options) || poll.options.length < 2) {
+      throw new Error('Unexpected AI response format. Try again.');
+    }
+
+    // Launch as an AI-flagged poll
+    launchPollWithData(poll.question, poll.options, true);
+    setAiStatus(`✓ AI poll launched: "${poll.question.slice(0,60)}…"`, true);
+
+  } catch(e) {
+    setAiStatus('⚠ ' + e.message, false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🤖 AI Poll';
+  }
+}
+
+// Runtime API key dialog
+function openApiKeyDialog() {
+  document.getElementById('runtime-key-input').value = getApiKey();
+  document.getElementById('apikey-overlay').classList.add('open');
+}
+function closeApiKeyDialog() {
+  document.getElementById('apikey-overlay').classList.remove('open');
+}
+function saveRuntimeKey() {
+  const k = document.getElementById('runtime-key-input').value.trim();
+  if (!k) return;
+  saveApiKey(k);
+  closeApiKeyDialog();
+  generateAIPoll();
+}
+
+// ════════════════════════════════════════════════════════════════
+// POLLING — PRESENTER
+// ════════════════════════════════════════════════════════════════
+function addOpt() {
+  const list    = document.getElementById('poll-opts-list');
+  const letters = 'ABCDEFGH';
+  const n       = list.children.length;
+  const row     = document.createElement('div');
+  row.className = 'poll-opt-r';
+  row.innerHTML = `<input placeholder="Option ${letters[n]}" class="popt"><button class="btn btn-ghost del" onclick="delOpt(this)">×</button>`;
+  list.appendChild(row);
+}
+
+function delOpt(btn) {
+  const list = document.getElementById('poll-opts-list');
+  if (list.children.length <= 2) return;
+  btn.closest('.poll-opt-r').remove();
+}
+
+function launchPoll(isAI = false) {
+  const q    = document.getElementById('poll-q-input').value.trim();
+  const opts = [...document.querySelectorAll('.popt')].map(i => i.value.trim()).filter(Boolean);
+  if (!q || opts.length < 2) { alert('Enter a question and at least 2 options.'); return; }
+  launchPollWithData(q, opts, isAI);
+}
+
+function launchPollWithData(question, options, isAI) {
+  activePoll = { question, options, isAI };
+  pollTally  = {};
+  pollVoters = new Set();
+  options.forEach((_, i) => pollTally[i] = 0);
+
+  broadcast({ type:'poll_start', question, options, isAI });
+
+  // Show results panel in sidebar
+  document.getElementById('poll-build').style.display = 'none';
+  document.getElementById('poll-live').style.display  = 'block';
+
+  const badge = document.getElementById('poll-live-badge');
+  badge.textContent = isAI ? '🤖 AI Poll' : 'Live Poll';
+  badge.className   = 'aud-poll-badge ' + (isAI ? 'ai' : 'manual');
+
+  document.getElementById('res-q-text').textContent = question;
+  renderResults();
+}
+
+function endPoll() {
+  activePoll = null;
+  broadcast({ type:'poll_end' });
+  document.getElementById('poll-live').style.display  = 'none';
+  document.getElementById('poll-build').style.display = 'block';
+  document.getElementById('poll-q-input').value = '';
+  document.querySelectorAll('.popt').forEach(i => i.value = '');
+}
+
+function incomingVote(msg) {
+  if (!activePoll || pollVoters.has(msg.peerId)) return;
+  pollVoters.add(msg.peerId);
+  pollTally[msg.optIdx] = (pollTally[msg.optIdx] || 0) + 1;
+  renderResults();
+  // Push updated tally to all audience so they see live results
+  broadcast({ type:'poll_tally', tally: pollTally, total: pollVoters.size });
+}
+
+function renderResults() {
+  const total = pollVoters.size || 1;
+  document.getElementById('res-list').innerHTML = activePoll.options.map((opt, i) => {
+    const v   = pollTally[i] || 0;
+    const pct = Math.round(v / total * 100);
+    const fillClass = activePoll.isAI ? 'res-fill' : 'res-fill';
+    return `<div class="res-row">
+      <div class="res-meta"><span class="res-label">${opt}</span><span class="res-count">${v} · ${pct}%</span></div>
+      <div class="res-track"><div class="${fillClass}" style="width:${pct}%;${activePoll.isAI?'background:linear-gradient(90deg,#7c3aed,#0099ff)':''}"></div></div>
+    </div>`;
+  }).join('');
+}
 
 // ════════════════════════════════════════════════════════════════
 // CHUNKED MESSAGING
@@ -883,206 +1129,6 @@ function decode(raw) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// SPEECH RECOGNITION
-// ════════════════════════════════════════════════════════════════
-let recognition = null;
-let transcript   = '';
-let listeningIdx = -1;
-
-function startListening(slideIdx) {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) return;
-
-  stopListening();
-  transcript   = '';
-  listeningIdx = slideIdx;
-
-  recognition = new SpeechRecognition();
-  recognition.continuous     = true;
-  recognition.interimResults = false;
-  recognition.lang           = 'en-US';
-
-  recognition.onresult = e => {
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) transcript += ' ' + e.results[i][0].transcript;
-    }
-  };
-
-  recognition.onstart = () => {
-    const mic = document.getElementById('mic-indicator');
-    if (mic) mic.style.display = 'flex';
-  };
-
-  recognition.onend = () => {
-    // Auto-restart if still on same slide
-    if (listeningIdx === slideIdx && recognition) {
-      try { recognition.start(); } catch(e) {}
-    } else {
-      const mic = document.getElementById('mic-indicator');
-      if (mic) mic.style.display = 'none';
-    }
-  };
-
-  recognition.onerror = e => {
-    if (e.error !== 'no-speech') console.warn('Speech error:', e.error);
-  };
-
-  try { recognition.start(); } catch(e) {}
-}
-
-function stopListening() {
-  listeningIdx = -1;
-  if (recognition) {
-    try { recognition.stop(); } catch(e) {}
-    recognition = null;
-  }
-  const mic = document.getElementById('mic-indicator');
-  if (mic) mic.style.display = 'none';
-}
-
-function getTranscript() {
-  return transcript.trim();
-}
-
-// ════════════════════════════════════════════════════════════════
-// AI QUESTION GENERATION — OpenRouter vision + voice
-// ════════════════════════════════════════════════════════════════
-async function generateQ(idx) {
-  const area = document.getElementById('pres-q-area');
-  document.getElementById('q-slide-tag').textContent = `slide ${idx+1}`;
-
-  // Start listening for this slide
-  startListening(idx);
-
-  if (!apiKey) {
-    area.innerHTML = '<div style="font-size:0.82rem;color:var(--muted);">Add OpenRouter API key in setup to enable AI questions.</div>';
-    return;
-  }
-
-  // Brief delay to capture any immediate speech before generating
-  await new Promise(r => setTimeout(r, 1200));
-
-  area.innerHTML = '<div class="q-loading"><span class="spinner"></span> Analyzing slide' +
-    (getTranscript() ? ' + speech' : '') + '…</div>';
-
-  try {
-    const b64      = slides[idx].split(',')[1];
-    const speech   = getTranscript();
-    const voicePart = speech
-      ? `
-
-The presenter said while showing this slide: "${speech}"`
-      : '';
-
-    const prompt = `This slide is from a pediatric anesthesia conference.${voicePart}
-
-Generate exactly 3 concise, thought-provoking discussion questions for anesthesiologists and trainees based on what is shown and said. Make questions specific to the content visible — not generic. Return ONLY a valid JSON array of 3 strings. No markdown, no preamble, no code fences.`;
-
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://slidesync.app',
-        'X-Title': 'SlideSync'
-      },
-      body: JSON.stringify({
-        model: 'meta-llama/llama-4-scout:free',
-        max_tokens: 400,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${b64}` } },
-            { type: 'text', text: prompt }
-          ]
-        }]
-      })
-    });
-
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-
-    const raw   = data.choices?.[0]?.message?.content?.trim() || '[]';
-    const clean = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
-    const qs    = JSON.parse(clean);
-
-    area.innerHTML = '<div class="q-list">' +
-      qs.map(q => `<div class="q-item">${q}</div>`).join('') +
-      '</div>';
-
-    broadcast({ type:'questions', slideIdx:idx, questions:qs });
-
-  } catch(e) {
-    area.innerHTML = `<div style="font-size:0.8rem;color:var(--red);">⚠ ${e.message}</div>`;
-  }
-}
-
-// ════════════════════════════════════════════════════════════════
-// POLLING — PRESENTER
-// ════════════════════════════════════════════════════════════════
-function addOpt() {
-  const list = document.getElementById('poll-opts-list');
-  const letters = 'ABCDEFGH';
-  const n = list.children.length;
-  const row = document.createElement('div');
-  row.className = 'poll-opt-r';
-  row.innerHTML = `<input placeholder="Option ${letters[n]}" class="popt"><button class="btn btn-ghost del" onclick="delOpt(this)">×</button>`;
-  list.appendChild(row);
-}
-
-function delOpt(btn) {
-  const list = document.getElementById('poll-opts-list');
-  if (list.children.length <= 2) return;
-  btn.closest('.poll-opt-r').remove();
-}
-
-function launchPoll() {
-  const q    = document.getElementById('poll-q-input').value.trim();
-  const opts = [...document.querySelectorAll('.popt')].map(i => i.value.trim()).filter(Boolean);
-  if (!q || opts.length < 2) { alert('Enter a question and at least 2 options.'); return; }
-
-  activePoll  = { question:q, options:opts };
-  pollTally   = {};
-  pollVoters  = new Set();
-  opts.forEach((_, i) => pollTally[i] = 0);
-
-  broadcast({ type:'poll_start', question:q, options:opts });
-
-  document.getElementById('poll-build').style.display = 'none';
-  document.getElementById('poll-live').style.display  = 'block';
-  document.getElementById('res-q-text').textContent   = q;
-  renderResults();
-}
-
-function endPoll() {
-  activePoll = null;
-  broadcast({ type:'poll_end' });
-  document.getElementById('poll-live').style.display  = 'none';
-  document.getElementById('poll-build').style.display = 'block';
-  document.getElementById('poll-q-input').value = '';
-  document.querySelectorAll('.popt').forEach(i => i.value = '');
-}
-
-function incomingVote(msg) {
-  if (!activePoll || pollVoters.has(msg.peerId)) return;
-  pollVoters.add(msg.peerId);
-  pollTally[msg.optIdx] = (pollTally[msg.optIdx] || 0) + 1;
-  renderResults();
-}
-
-function renderResults() {
-  const total = Object.values(pollTally).reduce((a,b) => a+b, 0) || 1;
-  document.getElementById('res-list').innerHTML = activePoll.options.map((opt, i) => {
-    const v = pollTally[i] || 0;
-    const pct = Math.round(v / total * 100);
-    return `<div class="res-row">
-      <div class="res-meta"><span class="res-label">${opt}</span><span class="res-count">${v} · ${pct}%</span></div>
-      <div class="res-track"><div class="res-fill" style="width:${pct}%"></div></div>
-    </div>`;
-  }).join('');
-}
-
-// ════════════════════════════════════════════════════════════════
 // AUDIENCE: JOIN + PEER
 // ════════════════════════════════════════════════════════════════
 function joinSession() {
@@ -1114,10 +1160,12 @@ function initAudiencePeer(targetId) {
     });
 
     presConn.on('close', () => document.getElementById('aud-dot').classList.remove('live'));
+    presConn.on('error', () => document.getElementById('aud-dot').classList.remove('live'));
   });
 
   peer.on('error', e => {
     document.getElementById('aud-dot').classList.remove('live');
+    document.getElementById('join-error').style.display = 'block';
     console.error('Peer error:', e);
   });
 }
@@ -1125,38 +1173,43 @@ function initAudiencePeer(targetId) {
 function handleAudMsg(msg, myId) {
   if (msg.type === 'slide') {
     const img = document.getElementById('aud-slide-img');
-    img.src = msg.img;
+    img.src   = msg.img;
     img.onload = () => {
       document.getElementById('aud-wait').style.display = 'none';
       showZoomHint();
     };
     document.getElementById('aud-slide-label').textContent = `${msg.idx + 1} / ${msg.total}`;
-
-    // Reset questions state
-    const qCard = document.getElementById('aud-q-card');
-    qCard.style.display = 'block';
-    document.getElementById('aud-q-list').innerHTML =
-      '<div class="aud-q-loading"><span class="spinner"></span> Generating questions…</div>';
-
     resetZoom();
     hasVoted = false;
-  }
-
-  if (msg.type === 'questions') {
-    document.getElementById('aud-q-list').innerHTML =
-      msg.questions.map((q, i) =>
-        `<div class="aud-q-item"><span class="aud-q-num">${i+1}</span><span>${q}</span></div>`
-      ).join('');
+    // Hide any open poll when slide changes
+    document.getElementById('aud-poll-card').classList.remove('visible');
   }
 
   if (msg.type === 'poll_start') {
     hasVoted = false;
-    document.getElementById('aud-poll-q').textContent = msg.question;
-    document.getElementById('voted-msg').style.display = 'none';
+    const isAI = !!msg.isAI;
+    const card  = document.getElementById('aud-poll-card');
+    const badge = document.getElementById('aud-poll-badge');
+
+    badge.textContent = isAI ? '🤖 AI Question' : '📊 Live Poll';
+    badge.className   = 'aud-poll-badge ' + (isAI ? 'ai' : 'manual');
+    card.className    = 'aud-poll-card' + (isAI ? ' ai-poll' : '') + ' visible';
+
+    document.getElementById('aud-poll-q').textContent       = msg.question;
+    document.getElementById('voted-msg').style.display      = 'none';
+    document.getElementById('aud-results').style.display    = 'none';
+
+    const letters = 'ABCDEFGH';
     document.getElementById('aud-poll-opts').innerHTML = msg.options.map((opt, i) =>
-      `<button class="aud-opt-btn" data-idx="${i}" onclick="castVote(${i},'${myId}')">${opt}</button>`
+      `<button class="aud-opt-btn" data-idx="${i}" onclick="castVote(${i},'${myId}',${isAI})">
+        <span class="opt-letter">${letters[i]}</span>${opt}
+      </button>`
     ).join('');
-    document.getElementById('aud-poll-card').classList.add('visible');
+  }
+
+  if (msg.type === 'poll_tally') {
+    // Update live results if we've already voted
+    if (hasVoted) renderAudResults(msg.tally, msg.total);
   }
 
   if (msg.type === 'poll_end') {
@@ -1164,15 +1217,39 @@ function handleAudMsg(msg, myId) {
   }
 }
 
-function castVote(optIdx, myId) {
+function castVote(optIdx, myId, isAI) {
   if (hasVoted) return;
   hasVoted = true;
+
   document.querySelectorAll('.aud-opt-btn').forEach((b, i) => {
     b.disabled = true;
-    if (i === optIdx) b.classList.add('chosen');
+    if (i === optIdx) b.classList.add(isAI ? 'ai-chosen' : 'chosen');
   });
+
   document.getElementById('voted-msg').style.display = 'block';
   if (presConn) sendTo(presConn, { type:'poll_vote', optIdx, peerId:myId });
+}
+
+function renderAudResults(tally, total) {
+  const opts   = [...document.querySelectorAll('.aud-opt-btn')].map(b => b.textContent.trim());
+  const isAI   = document.getElementById('aud-poll-card').classList.contains('ai-poll');
+  const resDiv = document.getElementById('aud-results');
+  const letters = 'ABCDEFGH';
+
+  resDiv.style.display = 'flex';
+  resDiv.innerHTML = opts.map((_, i) => {
+    const v   = tally[i] || 0;
+    const pct = total > 0 ? Math.round(v / total * 100) : 0;
+    return `<div class="aud-res-row">
+      <div class="aud-res-meta">
+        <span class="aud-res-label"><span style="color:var(--accent);margin-right:0.3rem;">${letters[i]}</span>${pct}%</span>
+        <span class="aud-res-count">${v} vote${v!==1?'s':''}</span>
+      </div>
+      <div class="aud-res-track">
+        <div class="aud-res-fill ${isAI?'ai-fill':''}" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1180,7 +1257,7 @@ function castVote(optIdx, myId) {
 // ════════════════════════════════════════════════════════════════
 let zScale = 1, zX = 0, zY = 0;
 let pinchDist = null, panStartX = 0, panStartY = 0;
-let lastTap = 0;
+let lastTap   = 0;
 
 const viewer = document.getElementById('slide-viewer');
 
@@ -1188,7 +1265,6 @@ function applyZoom() {
   document.getElementById('aud-slide-img').style.transform =
     `translate(${zX}px,${zY}px) scale(${zScale})`;
 }
-
 function resetZoom() { zScale = 1; zX = 0; zY = 0; applyZoom(); }
 
 viewer.addEventListener('touchstart', e => {
@@ -1201,7 +1277,6 @@ viewer.addEventListener('touchstart', e => {
     panStartX = e.touches[0].clientX - zX;
     panStartY = e.touches[0].clientY - zY;
   }
-  // Double tap
   const now = Date.now();
   if (now - lastTap < 280 && e.touches.length === 1) resetZoom();
   lastTap = now;
@@ -1214,7 +1289,7 @@ viewer.addEventListener('touchmove', e => {
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
     );
-    zScale = Math.max(1, Math.min(5, zScale * (d / pinchDist)));
+    zScale    = Math.max(1, Math.min(5, zScale * (d / pinchDist)));
     pinchDist = d;
     applyZoom();
   } else if (e.touches.length === 1 && zScale > 1) {
@@ -1237,7 +1312,6 @@ function setViewerHeight() {
   );
   v.style.height = h + 'px';
 }
-
 window.addEventListener('resize', setViewerHeight);
 
 let hintTimer = null;
