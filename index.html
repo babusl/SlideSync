@@ -682,6 +682,24 @@ label.field-label { display: block; font-size: 0.75rem; font-weight: 600; color:
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
+// TURN servers — needed for mobile/conference NAT traversal
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    {
+      urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443'],
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turns:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    }
+  ]
+};
+
 let peer        = null;
 let connections = [];
 let presConn    = null;
@@ -763,7 +781,7 @@ function makeShortId() {
 function initPresenterPeer() {
   setPresStatus('Connecting…', false);
   const shortId = makeShortId();
-  peer = new Peer(shortId, { debug: 0 });
+  peer = new Peer(shortId, { debug: 0, config: ICE_CONFIG });
 
   peer.on('open', id => {
     roomId = id;
@@ -961,7 +979,7 @@ Make options plausible but with one clearly best answer. Base question and optio
         'X-Title': 'SlideSync'
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-4-scout:free',
+        model: 'meta-llama/llama-3.2-11b-vision-instruct:free',
         max_tokens: 350,
         messages: [{
           role: 'user',
@@ -1142,7 +1160,7 @@ function joinSession() {
 
 function initAudiencePeer(targetId) {
   document.getElementById('aud-dot').classList.remove('live');
-  peer = new Peer(undefined, { debug: 0 });
+  peer = new Peer(undefined, { debug: 0, config: ICE_CONFIG });
 
   peer.on('open', myId => {
     presConn = peer.connect(targetId, { reliable: true });
