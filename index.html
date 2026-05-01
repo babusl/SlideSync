@@ -802,8 +802,11 @@ function initPresenterPeer() {
     connections.push(conn);
     updateAudCount();
     conn.on('open', () => {
-      if (slides.length) sendSlideToConn(conn, currentSlide);
-      if (activePoll) sendTo(conn, { type:'poll_start', ...activePoll });
+      // Short delay lets the data channel stabilise before we push data
+      setTimeout(() => {
+        if (slides.length) sendSlideToConn(conn, currentSlide);
+        if (activePoll) sendTo(conn, { type:'poll_start', ...activePoll });
+      }, 600);
     });
     conn.on('data', raw => {
       const msg = decode(raw);
@@ -888,12 +891,22 @@ async function handleFile(file) {
 
 async function renderPage(pdf, num) {
   const page = await pdf.getPage(num);
-  const vp   = page.getViewport({ scale: 1.8 });
-  const cvs  = document.createElement('canvas');
-  cvs.width  = vp.width;
-  cvs.height = vp.height;
-  await page.render({ canvasContext: cvs.getContext('2d'), viewport: vp }).promise;
-  return cvs.toDataURL('image/jpeg', 0.78);
+
+  // High-res for presenter display
+  const vpHi = page.getViewport({ scale: 1.8 });
+  const cHi  = document.createElement('canvas');
+  cHi.width  = vpHi.width; cHi.height = vpHi.height;
+  await page.render({ canvasContext: cHi.getContext('2d'), viewport: vpHi }).promise;
+  const display = cHi.toDataURL('image/jpeg', 0.82);
+
+  // Compressed for network transfer — much smaller
+  const vpLo = page.getViewport({ scale: 0.9 });
+  const cLo  = document.createElement('canvas');
+  cLo.width  = vpLo.width; cLo.height = vpLo.height;
+  await page.render({ canvasContext: cLo.getContext('2d'), viewport: vpLo }).promise;
+  const transfer = cLo.toDataURL('image/jpeg', 0.5);
+
+  return { display, transfer };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -904,7 +917,7 @@ function showPresSlide(idx) {
   currentSlide = idx;
 
   const img = document.getElementById('pres-slide-img');
-  img.src = slides[idx];
+  img.src = slides[idx].display;
   img.style.display = 'block';
 
   document.getElementById('pres-counter').textContent = `${idx + 1} / ${slides.length}`;
@@ -915,7 +928,7 @@ function showPresSlide(idx) {
   aiBtn.disabled = false;
 
   setAiStatus('Ready — click "🤖 AI Poll" to generate a question from this slide.');
-  broadcast({ type:'slide', idx, total:slides.length, img:slides[idx] });
+  broadcast({ type:'slide', idx, total:slides.length, img:slides[idx].transfer });
 }
 
 function nextSlide() { if (currentSlide < slides.length - 1) showPresSlide(currentSlide + 1); }
@@ -952,7 +965,7 @@ async function generateAIPoll() {
   setAiStatus('Analyzing slide with AI…', true);
 
   try {
-    const b64    = slides[currentSlide].split(',')[1];
+    const b64    = slides[currentSlide].display.split(',')[1];
     const prompt = `You are an expert in pediatric anesthesia education. Examine this conference slide carefully.
 
 Generate ONE multiple-choice question that tests understanding of the key concept shown. The question should be suitable for anesthesiologists and trainees.
@@ -970,33 +983,43 @@ Return ONLY a valid JSON object — no markdown, no preamble, no code fences:
 
 Make options plausible but with one clearly best answer. Base question and options directly on visible slide content.`;
 
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${key}`,
-        'HTTP-Referer': 'https://slidesync.app',
-        'X-Title': 'SlideSync'
-      },
-      body: JSON.stringify({
-        model: 'meta-llama/llama-3.2-11b-vision-instruct:free',
-        max_tokens: 350,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${b64}` } },
-            { type: 'text', text: prompt }
-          ]
-        }]
-      })
-    });
+    // Try free vision models in order until one works
+    const MODELS = [
+      'google/gemini-2.0-flash-exp:free',
+      'qwen/qwen2-vl-7b-instruct:free',
+      'meta-llama/llama-3.2-11b-vision-instruct:free',
+      'microsoft/phi-3-vision-128k-instruct:free'
+    ];
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    let data = null;
+    let lastErr = '';
+    for (const model of MODELS) {
+      setAiStatus(`Trying ${model.split('/')[1].split(':')[0]}…`, true);
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`,
+          'HTTP-Referer': 'https://slidesync.app',
+          'X-Title': 'SlideSync'
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 350,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${b64}` } },
+              { type: 'text', text: prompt }
+            ]
+          }]
+        })
+      });
+      const json = await res.json();
+      if (json.error) { lastErr = json.error.message || JSON.stringify(json.error); continue; }
+      if (json.choices?.[0]?.message?.content) { data = json; break; }
     }
-
-    const data  = await res.json();
+    if (!data) throw new Error('All free models failed: ' + lastErr);
     const raw   = data.choices?.[0]?.message?.content?.trim() || '{}';
     const clean = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
     const poll  = JSON.parse(clean);
@@ -1127,7 +1150,7 @@ function sendTo(conn, msg) {
 function broadcast(msg) { connections.forEach(c => sendTo(c, msg)); }
 
 function sendSlideToConn(conn, idx) {
-  sendTo(conn, { type:'slide', idx, total:slides.length, img:slides[idx] });
+  sendTo(conn, { type:'slide', idx, total:slides.length, img:slides[idx].transfer });
 }
 
 function decode(raw) {
